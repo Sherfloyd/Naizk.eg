@@ -358,10 +358,16 @@
       });
 
       document.querySelectorAll('.cart-item-quantity input').forEach(input => {
-        input.addEventListener('change', (e) => {
-          const index = e.target.dataset.index;
-          cart[index].quantity = Math.max(1, parseInt(e.target.value) || 1);
-          updateTotal();
+  input.addEventListener('blur', (e) => {
+    const index = e.target.dataset.index;
+    const value = parseInt(e.target.value);
+    if (!isNaN(value) && value > 0) {
+      cart[index].quantity = value;
+    } else {
+      cart[index].quantity = 1;
+      e.target.value = 1;
+    }
+    updateTotal();
         });
       });
 
