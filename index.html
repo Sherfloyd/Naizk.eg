@@ -225,6 +225,54 @@
     .confirm-order-btn:hover {
       background: #ff4500;
     }
+    .order-form-overlay {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 3000;
+    }
+    .order-form {
+      background: #11172e;
+      padding: 20px;
+      border-radius: 15px;
+      max-width: 400px;
+      width: 90%;
+      color: white;
+    }
+    .order-form label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+    .order-form input,
+    .order-form select {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      border: none;
+      background: #222;
+      color: white;
+    }
+    .order-form button {
+      background: #f58224;
+      border: none;
+      padding: 10px;
+      width: 100%;
+      font-size: 16px;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+    }
+    .order-form button:hover {
+      background: #ff4500;
+    }
   </style>
 </head>
 <body>
@@ -278,6 +326,30 @@
     <div class="cart-items" id="cart-items"></div>
     <div class="cart-total" id="cart-total">المجموع: 0 جنيه</div>
     <button class="confirm-order-btn" id="confirm-order">تأكيد الطلب</button>
+  </div>
+
+  <div class="order-form-overlay" id="order-form-overlay" style="display:none;">
+    <form class="order-form" id="order-form">
+      <label for="name">الاسم</label>
+      <input type="text" id="name" required />
+
+      <label for="address">العنوان بالتفصيل</label>
+      <input type="text" id="address" required />
+
+      <label for="phone1">رقم التليفون</label>
+      <input type="tel" id="phone1" required />
+
+      <label for="phone2">رقم تليفون آخر</label>
+      <input type="tel" id="phone2" />
+
+      <label for="delivery">تحب التوصيل لفين؟</label>
+      <select id="delivery">
+        <option value="من البلكونة">من البلكونة</option>
+        <option value="من الباب">من الباب</option>
+      </select>
+
+      <button type="submit">إرسال الطلب على واتساب</button>
+    </form>
   </div>
 
   <script>
@@ -394,6 +466,38 @@
       alert("تم تأكيد الطلب، سيتم التواصل معك قريبًا.");
       cart = [];
       renderCart();
+      cartSidebar.classList.remove('open');
+    });
+
+   confirmOrderBtn.addEventListener('click', () => {
+  if (cart.length === 0) {
+    alert("السلة فارغة.");
+    return;
+  }
+  document.getElementById('order-form-overlay').style.display = 'flex';
+});
+
+    document.getElementById('order-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById('name').value.trim();
+      const address = document.getElementById('address').value.trim();
+      const phone1 = document.getElementById('phone1').value.trim();
+      const phone2 = document.getElementById('phone2').value.trim();
+      const delivery = document.getElementById('delivery').value;
+
+      const items = cart.map(item => `${item.name} (×${item.quantity}) = ${item.price * item.quantity} جنيه`).join("\n");
+      const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+      const message = `طلب جديد:\n\nالمنتجات:\n${items}\n\nالمجموع: ${total} جنيه\n\nالاسم: ${name}\nالعنوان: ${address}\nرقم الهاتف: ${phone1}\nرقم هاتف آخر: ${phone2 || 'لا يوجد'}\nطريقة التوصيل: ${delivery}`;
+
+      const phoneNumber = "201098738211"; // ← ضع رقمك هنا بدون +
+      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+
+      cart = [];
+      renderCart();
+      document.getElementById('order-form-overlay').style.display = 'none';
       cartSidebar.classList.remove('open');
     });
   </script>
